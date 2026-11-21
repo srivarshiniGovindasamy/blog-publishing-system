@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} — My Posts{% endblock %}
+
+{% block content %}
+<section class="dashboard-page post-editor-page">
+    <article class="post-editor-card post-reading-card">
+        <a href="{{ url_for('auth.author_dashboard') }}" class="editor-back-link">← Back to My Posts</a>
+        <span class="post-status post-status-{{ post.status }}">{{ post.status|title }}</span>
+        <h1>{{ post.title }}</h1>
+        <p class="author-post-dates">
+            Created {{ post.created_at.strftime("%b %d, %Y") }}
+            <span aria-hidden="true">·</span>
+            Updated {{ post.updated_at.strftime("%b %d, %Y") }}
+        </p>
+        {% if post.categories or post.tags %}
+        <div class="author-post-terms">
+            {% for category in post.categories %}
+            <span class="post-term post-category">{{ category.name }}</span>
+            {% endfor %}
+            {% for tag in post.tags %}
+            <span class="post-term">#{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="post-reading-content">{{ post.content }}</div>
+        {% if post.status != "archived" %}
+        <a href="{{ url_for('auth.edit_post', post_id=post.id) }}" class="btn btn-outline">Edit</a>
+        {% endif %}
+        {% include "auth/_revision_history.html" %}
+    </article>
+</section>
+{% endblock %}

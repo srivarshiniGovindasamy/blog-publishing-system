@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Reader Area — Blog Publishing System{% endblock %}
+
+{% block content %}
+<section class="dashboard-page reader-area-page">
+    <div class="reader-area-container">
+        <header class="reader-area-header">
+            <span class="dashboard-badge">Reader area</span>
+            <h1>Welcome, {{ current_user.name }}.</h1>
+            <p>Your saved stories, reading history and comments.</p>
+            <nav class="reader-area-nav" aria-label="Reader area sections">
+                <a href="#bookmarks">Bookmarks</a>
+                <a href="#reading-history">Reading History</a>
+                <a href="#my-comments">My Comments</a>
+            </nav>
+        </header>
+
+        <section class="reader-area-section" id="bookmarks" aria-labelledby="bookmarks-heading">
+            <h2 id="bookmarks-heading">🔖 My Bookmarks</h2>
+            {% if bookmarks %}
+            <div class="reader-bookmark-grid">
+                {% for bookmark in bookmarks %}
+                <article class="reader-item-card">
+                    {% if bookmark.post.status == "published" %}
+                    <a class="reader-item-title" href="{{ url_for('auth.public_post', post_id=bookmark.post.id) }}">{{ bookmark.post.title }}</a>
+                    <p>By {{ bookmark.post.author.name }} · {{ bookmark.post.reading_time_minutes }} min read</p>
+                    {% else %}
+                    <strong class="reader-item-title">{{ bookmark.post.title }}</strong>
+                    <p>This story is no longer published.</p>
+                    {% endif %}
+                    <form method="post" action="{{ url_for('auth.remove_bookmark', post_id=bookmark.post.id) }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline btn-sm">Remove bookmark</button>
+                    </form>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="reader-area-empty">You have not bookmarked any stories yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="reader-area-section" id="reading-history" aria-labelledby="history-heading">
+            <h2 id="history-heading">📖 Reading History</h2>
+            {% if reading_history %}
+            <ul class="reader-history-list">
+                {% for item in reading_history %}
+                <li class="reader-history-item">
+                    {% if item.post.status == "published" %}
+                    <a href="{{ url_for('auth.public_post', post_id=item.post.id) }}">{{ item.post.title }}</a>
+                    {% else %}
+                    <span>{{ item.post.title }} <span class="reader-unavailable">(no longer published)</span></span>
+                    {% endif %}
+                    <time datetime="{{ item.read_at.isoformat() }}">Last read {{ item.read_at.strftime("%b %d, %Y · %I:%M %p") }}</time>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="reader-area-empty">Stories you read will appear here.</p>
+            {% endif %}
+        </section>
+
+        <section class="reader-area-section" id="my-comments" aria-labelledby="my-comments-heading">
+            <h2 id="my-comments-heading">💬 My Comments</h2>
+            {% if comments %}
+            <div class="reader-comment-list">
+                {% for comment in comments %}
+                <article class="reader-item-card reader-comment-item">
+                    <header class="reader-comment-header">
+                        {% if comment.post.status == "published" %}
+                        <a class="reader-item-title" href="{{ url_for('auth.public_post', post_id=comment.post.id) }}">{{ comment.post.title }}</a>
+                        {% else %}
+                        <strong class="reader-item-title">{{ comment.post.title }}</strong>
+                        {% endif %}
+                        <span class="post-status {{ 'post-status-published' if comment.approved else 'post-status-draft' }}">
+                            {{ "Approved" if comment.approved else "Rejected" }}
+                        </span>
+                    </header>
+                    <p>{{ comment.content }}</p>
+                    {% if comment.moderation_reason %}
+                    <p class="reader-moderation-reason">Reason: {{ comment.moderation_reason }}</p>
+                    {% endif %}
+                    <time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime("%b %d, %Y · %I:%M %p") }}</time>
+                    <form method="post" action="{{ url_for('auth.delete_reader_comment', comment_id=comment.id) }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline btn-sm">Delete comment</button>
+                    </form>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="reader-area-empty">Your comments will appear here.</p>
+            {% endif %}
+        </section>
+    </div>
+</section>
+{% endblock %}

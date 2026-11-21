@@ -1,0 +1,12 @@
+<section class="seo-score-card" aria-label="Content quality">
+    <div class="seo-score-summary">
+        <span class="seo-score-label">SEO Score</span>
+        <strong>{{ seo_analysis.score }} <span>/ 100</span></strong>
+        <span class="seo-score-rating">{{ seo_analysis.label }}</span>
+    </div>
+    <ul class="seo-score-reasons">
+        {% for reason in seo_analysis.reasons %}
+        <li>{{ reason }}</li>
+        {% endfor %}
+    </ul>
+</section>

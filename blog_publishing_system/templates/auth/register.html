@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Create account — Blog Publishing System{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-card auth-card-register">
+        <div class="auth-mark" aria-hidden="true">✦</div>
+        <p class="auth-eyebrow">Find your place</p>
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-description">Join as an author or reader and make this space yours.</p>
+
+        <form method="post" class="auth-form auth-form-register">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+            <div class="auth-grid auth-grid-two">
+                <div class="auth-field-group">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" type="text" autocomplete="name"
+                           maxlength="120" value="{{ request.form.get('name', '') }}" required>
+                </div>
+
+                <div class="auth-field-group">
+                    <label for="email">Email address</label>
+                    <input id="email" name="email" type="email" autocomplete="email"
+                           maxlength="255" value="{{ request.form.get('email', '') }}" required>
+                </div>
+            </div>
+
+            <div class="auth-grid auth-grid-two">
+                <div class="auth-field-group">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="new-password"
+                           minlength="8" maxlength="128" required>
+                </div>
+
+                <div class="auth-field-group">
+                    <label for="confirm_password">Confirm password</label>
+                    <input id="confirm_password" name="confirm_password" type="password"
+                           autocomplete="new-password" minlength="8" maxlength="128" required>
+                </div>
+            </div>
+
+            <div class="auth-field-group">
+                <label for="role">I want to join as</label>
+                <select id="role" name="role" required>
+                    <option value="" disabled {% if not request.form.get('role') %}selected{% endif %}>Choose Author or Reader</option>
+                    <option value="author" {% if request.form.get('role') == 'author' %}selected{% endif %}>Author</option>
+                    <option value="reader" {% if request.form.get('role') == 'reader' %}selected{% endif %}>Reader</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-submit">Create account</button>
+        </form>
+        <p class="auth-switch">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+    </div>
+</section>
+{% endblock %}

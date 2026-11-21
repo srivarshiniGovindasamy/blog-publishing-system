@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A modern blog publishing platform with automated content moderation and quality analysis.">
+
+    <title>{% block title %}Blog Publishing System{% endblock %}</title>
+
+    <!-- Google Fonts — Inter for clean modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ============================================================
+         NAVIGATION
+         ============================================================ -->
+    <header class="site-header" id="site-header">
+        <nav class="nav-container">
+            <a href="{{ url_for('home') }}" class="nav-logo" id="nav-logo">
+                <span class="logo-icon">✦</span>
+                <span class="logo-text">BlogPublish</span>
+            </a>
+
+            <ul class="nav-links" id="nav-links">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == "admin" %}
+                    <li><a href="{{ url_for('auth.admin_dashboard') }}" class="nav-link">Admin Dashboard</a></li>
+                    <li><a href="{{ url_for('auth.admin_users') }}" class="nav-link">User Management</a></li>
+                    {% elif current_user.role == "author" %}
+                    <li><a href="{{ url_for('home') }}" class="nav-link active">Home</a></li>
+                    <li><a href="{{ url_for('auth.author_dashboard') }}" class="nav-link">Author Dashboard</a></li>
+                    {% else %}
+                    <li><a href="{{ url_for('home') }}" class="nav-link active">Home</a></li>
+                    <li><a href="{{ url_for('auth.reader_dashboard') }}" class="nav-link">Reader Area</a></li>
+                    {% endif %}
+                    <li>
+                        <form action="{{ url_for('auth.logout') }}" method="post" class="nav-logout">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="nav-link nav-link-button">Log out</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{{ url_for('home') }}" class="nav-link active">Home</a></li>
+                    <li><a href="{{ url_for('auth.login') }}" class="nav-link">Log in</a></li>
+                    <li><a href="{{ url_for('auth.register') }}" class="nav-link">Create account</a></li>
+                {% endif %}
+            </ul>
+
+            <!-- Mobile menu toggle -->
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                <span class="hamburger"></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- ============================================================
+         FLASH MESSAGES (for future use)
+         ============================================================ -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container" id="flash-container">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">
+                <span>{{ message }}</span>
+                <button class="flash-close" aria-label="Close">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- ============================================================
+         ERROR DISPLAY (used by error handlers)
+         ============================================================ -->
+    {% if error_code %}
+    <main class="main-content">
+        <section class="error-section" id="error-section">
+            <div class="error-card">
+                <span class="error-code">{{ error_code }}</span>
+                <h1 class="error-title">{{ error_message }}</h1>
+                <p class="error-description">Sorry, something went wrong. Please try again or return to the home page.</p>
+                <a href="{{ url_for('home') }}" class="btn btn-primary">Go Home</a>
+            </div>
+        </section>
+    </main>
+    {% else %}
+
+    <!-- ============================================================
+         MAIN CONTENT
+         ============================================================ -->
+    <main class="main-content" id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% endif %}
+
+    <!-- ============================================================
+         FOOTER
+         ============================================================ -->
+    <footer class="site-footer" id="site-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="logo-icon">✦</span>
+                <span>BlogPublish</span>
+            </div>
+            <p class="footer-text">&copy; 2026 Blog Publishing System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

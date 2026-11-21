@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — Blog Publishing System{% endblock %}
+
+{% block content %}
+<section class="dashboard-page admin-page">
+    <div class="admin-container">
+        <header class="admin-welcome">
+            <div>
+                <span class="dashboard-badge">Account administration</span>
+                <h1>Admin Dashboard</h1>
+                <p>Manage platform accounts and roles.</p>
+            </div>
+            <a href="{{ url_for('auth.admin_users') }}" class="btn btn-primary">Manage Users</a>
+        </header>
+
+        <section class="admin-stat-grid" aria-label="User statistics">
+            <article class="admin-stat-card">
+                <span>Total Users</span>
+                <strong>{{ user_counts.total }}</strong>
+            </article>
+            <article class="admin-stat-card">
+                <span>Authors</span>
+                <strong>{{ user_counts.author }}</strong>
+            </article>
+            <article class="admin-stat-card">
+                <span>Readers</span>
+                <strong>{{ user_counts.reader }}</strong>
+            </article>
+            <article class="admin-stat-card">
+                <span>Admins</span>
+                <strong>{{ user_counts.admin }}</strong>
+            </article>
+        </section>
+
+        <section class="admin-management-link">
+            <div>
+                <h2>User Management</h2>
+                <p>Review accounts, update Reader and Author roles, or safely remove eligible accounts.</p>
+            </div>
+            <a href="{{ url_for('auth.admin_users') }}" class="btn btn-outline">Open User Management</a>
+        </section>
+    </div>
+</section>
+{% endblock %}

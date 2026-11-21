@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Discover stories — Blog Publishing System{% endblock %}
+
+{% block content %}
+<section class="public-stories-section" aria-labelledby="public-stories-heading">
+    <div class="public-stories-container">
+        <header class="public-stories-heading">
+            <span class="dashboard-badge">Blog Publishing System</span>
+            <h1 id="public-stories-heading">Discover stories</h1>
+            <p>Find thoughtful ideas, guides, and perspectives from our authors.</p>
+        </header>
+
+        <form class="feed-filters" method="get" action="{{ url_for('home') }}">
+            <div class="feed-search-field">
+                <label for="feed-search">Search blogs</label>
+                <input id="feed-search" name="search" type="search" maxlength="200"
+                       value="{{ search }}" placeholder="Search titles, articles, or authors...">
+            </div>
+            <div class="feed-filter-field">
+                <label for="feed-category">Category</label>
+                <select id="feed-category" name="category">
+                    <option value="">All Categories</option>
+                    {% for category_name_option, category in categories %}
+                    <option value="{{ category_name_option }}"
+                            {% if category_name|lower == category_name_option|lower %}selected{% endif %}>
+                        {{ category_name_option }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="feed-filter-field">
+                <label for="feed-tag">Tag</label>
+                <select id="feed-tag" name="tag">
+                    <option value="">All Tags</option>
+                    {% for tag_name_option, tag in tags %}
+                    <option value="{{ tag_name_option }}"
+                            {% if tag_name|lower == tag_name_option|lower %}selected{% endif %}>
+                        {{ tag_name_option }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="feed-filter-actions">
+                <button class="btn btn-primary" type="submit">Search &amp; Filter</button>
+                {% if search or category_name or tag_name or request.args.get("page") %}
+                <a class="btn btn-outline" href="{{ url_for('home') }}">Reset Filters</a>
+                {% endif %}
+            </div>
+        </form>
+
+        {% if posts %}
+        <p class="feed-result-count">
+            {{ pagination.total }} {{ "story" if pagination.total == 1 else "stories" }} found
+        </p>
+        <div class="public-story-grid">
+            {% for post in posts %}
+            <a class="public-story-card-link" href="{{ url_for('auth.public_post', post_id=post.id) }}">
+                <article class="public-story-card">
+                    <span class="public-story-preview" aria-hidden="true"><span>✦</span></span>
+                    <div class="public-story-card-body">
+                        <p class="public-story-meta">By {{ post.author.name }}</p>
+                        <h2>{{ post.title }}</h2>
+                        <p class="public-story-excerpt">{{ post.content|striptags|truncate(220, true) }}</p>
+                        <p class="public-story-meta">
+                            {{ post.updated_at.strftime("%b %d, %Y") }} · {{ post.reading_time_minutes }} min read
+                        </p>
+                        {% if post.categories or post.tags %}
+                        <div class="author-post-terms">
+                            {% for category in post.categories %}
+                            <span class="post-term post-category">{{ category.name }}</span>
+                            {% endfor %}
+                            {% for tag in post.tags %}
+                            <span class="post-term">#{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="public-story-card-footer">
+                            <span class="public-story-seo">
+                                SEO {{ seo_analyses[post.id].score }}/100
+                                <span>{{ seo_analyses[post.id].label }}</span>
+                            </span>
+                            <span class="public-story-link">Read →</span>
+                        </div>
+                    </div>
+                </article>
+            </a>
+            {% endfor %}
+        </div>
+
+        {% if pagination.pages > 1 %}
+        <nav class="feed-pagination" aria-label="Blog feed pages">
+            {% if pagination.has_prev %}
+            <a class="feed-page-link"
+               href="{{ url_for('home', search=search or None, category=category_name or None, tag=tag_name or None, page=pagination.prev_num) }}">
+                ← Previous
+            </a>
+            {% endif %}
+            <div class="feed-page-numbers">
+                {% for page_number in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_number %}
+                        {% if page_number == pagination.page %}
+                        <span class="feed-page-number is-current" aria-current="page">{{ page_number }}</span>
+                        {% else %}
+                        <a class="feed-page-number"
+                           href="{{ url_for('home', search=search or None, category=category_name or None, tag=tag_name or None, page=page_number) }}">
+                            {{ page_number }}
+                        </a>
+                        {% endif %}
+                    {% else %}
+                    <span class="feed-page-ellipsis" aria-hidden="true">…</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% if pagination.has_next %}
+            <a class="feed-page-link"
+               href="{{ url_for('home', search=search or None, category=category_name or None, tag=tag_name or None, page=pagination.next_num) }}">
+                Next →
+            </a>
+            {% endif %}
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="public-feed-empty">
+            {% if search %}
+            <h2>No posts found for your search.</h2>
+            <p>Try a different keyword or reset the filters.</p>
+            {% elif category_name and tag_name %}
+            <h2>No posts match these filters.</h2>
+            <p>Try changing the category or tag, or reset the filters.</p>
+            {% elif category_name %}
+            <h2>No posts found in this category.</h2>
+            <p>Try another category or reset the filters.</p>
+            {% elif tag_name %}
+            <h2>No posts found with this tag.</h2>
+            <p>Try another tag or reset the filters.</p>
+            {% else %}
+            <h2>No published posts yet.</h2>
+            <p>Check back soon for something new to read.</p>
+            {% endif %}
+            {% if search or category_name or tag_name %}
+            <a class="btn btn-outline" href="{{ url_for('home') }}">Reset Filters</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

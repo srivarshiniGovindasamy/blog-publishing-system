@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Edit post" if post and post.id else "Create a post" }} — Blog Publishing System{% endblock %}
+
+{% block content %}
+<section class="dashboard-page post-editor-page">
+    <div class="post-editor-card">
+        <a href="{{ url_for('auth.author_dashboard') }}" class="editor-back-link">← Back to My Posts</a>
+        <span class="dashboard-badge">Author workspace</span>
+        <h1>{{ "Edit your post" if post and post.id else "Create a post" }}</h1>
+        <p class="editor-description">
+            {% if post and post.status == "published" %}
+            Update your published post. Saving changes will keep it published.
+            {% else %}
+            Write and organize your post. Save it as a draft or publish it when it is ready.
+            {% endif %}
+        </p>
+
+        <form method="post" class="post-editor-form">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+            <div class="post-editor-field">
+                <label for="title">Title</label>
+                <input id="title" name="title" type="text" maxlength="200"
+                       value="{{ request.form.get('title', post.title if post else '') }}"
+                       placeholder="Give your post a clear title" required>
+            </div>
+
+            <div class="post-editor-field">
+                <label for="content">Content</label>
+                <textarea id="content" name="content" rows="18"
+                          placeholder="Start writing your story..." required>{{ request.form.get('content', post.content if post else '') }}</textarea>
+            </div>
+
+            {% if seo_analysis %}
+            {% include "auth/_seo_score.html" %}
+            {% endif %}
+
+            <fieldset class="post-editor-field term-picker">
+                <legend>Categories</legend>
+                <div class="term-picker-grid">
+                    {% for category_name, category in categories %}
+                    <label class="term-picker-option" for="category-{{ loop.index }}">
+                        <input id="category-{{ loop.index }}" name="categories" type="checkbox"
+                               value="{{ category_name }}"
+                               {% if category_name in selected_categories %}checked{% endif %}>
+                        <span>{{ category_name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <small>Choose from the available categories.</small>
+            </fieldset>
+
+            <fieldset class="post-editor-field term-picker">
+                <legend>Tags</legend>
+                <div class="term-picker-grid">
+                    {% for tag_name, tag in tags %}
+                    <label class="term-picker-option" for="tag-{{ loop.index }}">
+                        <input id="tag-{{ loop.index }}" name="tags" type="checkbox"
+                               value="{{ tag_name }}"
+                               {% if tag_name in selected_tags %}checked{% endif %}>
+                        <span>{{ tag_name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <small>Select any tags that describe your post.</small>
+            </fieldset>
+
+            <div class="post-editor-actions">
+                <button type="submit" name="action" value="save" class="btn btn-outline">
+                    {{ "Save Changes" if post and post.status == "published" else "Save Draft" }}
+                </button>
+                {% if post and post.status == "draft" %}
+                <button type="submit" name="action" value="publish" class="btn btn-primary">Publish</button>
+                {% endif %}
+            </div>
+        </form>
+        {% if post and post.id %}
+        {% include "auth/_revision_history.html" %}
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

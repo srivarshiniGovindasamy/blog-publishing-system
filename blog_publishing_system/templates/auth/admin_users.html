@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}User Management — Blog Publishing System{% endblock %}
+
+{% block content %}
+<section class="dashboard-page admin-page">
+    <div class="admin-container">
+        <header class="admin-welcome">
+            <div>
+                <span class="dashboard-badge">Account administration</span>
+                <h1>User Management</h1>
+                <p>Manage account roles and remove accounts that have no associated content or Reader activity.</p>
+            </div>
+            <a href="{{ url_for('auth.admin_dashboard') }}" class="btn btn-outline">Admin Dashboard</a>
+        </header>
+
+        {% if users %}
+        <div class="admin-user-table-wrap">
+            <table class="admin-user-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Account Created</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td data-label="Name">{{ user.name }}</td>
+                        <td data-label="Email">{{ user.email }}</td>
+                        <td data-label="Role">
+                            <span class="admin-role-badge admin-role-{{ user.role }}">{{ user.role|title }}</span>
+                        </td>
+                        <td data-label="Account Created">
+                            {{ user.created_at.strftime("%b %d, %Y") if user.created_at else "—" }}
+                        </td>
+                        <td data-label="Actions">
+                            {% if user.role in ("author", "reader") %}
+                            <div class="admin-user-actions">
+                                <form method="post"
+                                      action="{{ url_for('auth.change_user_role', user_id=user.id) }}"
+                                      onsubmit="return confirm('Change this user\\'s role from {{ user.role|title }} to {{ 'Author' if user.role == 'reader' else 'Reader' }}?');">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="role" value="{{ 'author' if user.role == 'reader' else 'reader' }}">
+                                    <button type="submit" class="btn btn-outline btn-sm">
+                                        Change to {{ "Author" if user.role == "reader" else "Reader" }}
+                                    </button>
+                                </form>
+                                <form method="post"
+                                      action="{{ url_for('auth.delete_user', user_id=user.id) }}"
+                                      onsubmit="return confirm('Delete this user? This action cannot be undone.');">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <span class="admin-protected-note">Protected administrator</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="admin-empty-state">
+            <h2>No users found.</h2>
+            <p>There are no accounts to manage yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,31 @@
+<section class="revision-history" id="revision-history" aria-labelledby="revision-history-heading">
+    <div class="revision-history-heading">
+        <div>
+            <h2 id="revision-history-heading">Revision History</h2>
+            <p>Each save keeps a complete snapshot of your post content.</p>
+        </div>
+        <span class="revision-count">{{ revisions|length }} {{ "revision" if revisions|length == 1 else "revisions" }}</span>
+    </div>
+
+    {% if revisions %}
+    <ol class="revision-list">
+        {% for revision in revisions %}
+        <li class="revision-card">
+            <div class="revision-card-heading">
+                <span class="revision-number">Revision {{ revision.revision_number }}</span>
+                <time datetime="{{ revision.created_at.isoformat() }}">{{ revision.created_at.strftime("%b %d, %Y · %I:%M %p") }}</time>
+            </div>
+            <p class="revision-preview">{{ revision.content|striptags|truncate(160, true) }}</p>
+            <form method="post"
+                  action="{{ url_for('auth.rollback_revision', post_id=post.id, revision_id=revision.id) }}"
+                  data-confirm="Are you sure you want to rollback to Revision {{ revision.revision_number }}? Your current content will be preserved as a new revision.">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline revision-rollback">Rollback</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="revision-empty">No revisions are available yet.</p>
+    {% endif %}
+</section>

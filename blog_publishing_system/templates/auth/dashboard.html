@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}{{ role_name }} area — Blog Publishing System{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+    <div class="dashboard-card">
+        <span class="dashboard-badge">{{ role_name }} area</span>
+        <h1>Welcome, {{ current_user.name }}.</h1>
+        <p>Your {{ role_name|lower }} dashboard is ready. More tools for this area will arrive in a later module.</p>
+        <a href="{{ url_for('home') }}" class="btn btn-outline">Back to home</a>
+    </div>
+</section>
+{% endblock %}

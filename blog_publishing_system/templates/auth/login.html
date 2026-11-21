@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Log in — Blog Publishing System{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-card auth-card-compact">
+        <div class="auth-mark" aria-hidden="true">✦</div>
+        <p class="auth-eyebrow">Welcome back</p>
+        <h1 class="auth-title">Log in to your space</h1>
+        <p class="auth-description">Choose your account role and continue where you left off.</p>
+
+        <form method="post" class="auth-form auth-form-compact">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+            <div class="auth-field-group">
+                <label for="email">Email address</label>
+                <input id="email" name="email" type="email" autocomplete="email"
+                       maxlength="255" value="{{ request.form.get('email', '') }}" required>
+            </div>
+
+            <div class="auth-field-group">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password"
+                       autocomplete="current-password" maxlength="128" required>
+            </div>
+
+            <div class="auth-field-group">
+                <label for="role">Sign in as</label>
+                <select id="role" name="role" required>
+                    <option value="" disabled {% if not request.form.get('role') %}selected{% endif %}>Choose your role</option>
+                    <option value="admin" {% if request.form.get('role') == 'admin' %}selected{% endif %}>Admin</option>
+                    <option value="author" {% if request.form.get('role') == 'author' %}selected{% endif %}>Author</option>
+                    <option value="reader" {% if request.form.get('role') == 'reader' %}selected{% endif %}>Reader</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-submit">Log in</button>
+        </form>
+        <p class="auth-switch">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+    </div>
+</section>
+{% endblock %}

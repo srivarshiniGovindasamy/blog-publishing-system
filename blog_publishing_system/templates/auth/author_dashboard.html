@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Author dashboard — Blog Publishing System{% endblock %}
+
+{% block content %}
+<section class="dashboard-page author-dashboard-page">
+    <div class="author-dashboard">
+        <header class="author-welcome">
+            <div>
+                <span class="dashboard-badge">Author area</span>
+                <h1>Welcome, {{ current_user.name }}.</h1>
+                <p>Your writing space, all in one place.</p>
+            </div>
+            <a href="{{ url_for('auth.create_post') }}" class="btn btn-primary">Create Post</a>
+        </header>
+
+        <section class="post-statistics" aria-label="Post statistics">
+            <article class="post-stat-card">
+                <span class="post-stat-number">{{ posts|length }}</span>
+                <span class="post-stat-label">Total Posts</span>
+            </article>
+            <article class="post-stat-card">
+                <span class="post-stat-number">{{ counts.draft }}</span>
+                <span class="post-stat-label">Drafts</span>
+            </article>
+            <article class="post-stat-card">
+                <span class="post-stat-number">{{ counts.published }}</span>
+                <span class="post-stat-label">Published</span>
+            </article>
+            <article class="post-stat-card">
+                <span class="post-stat-number">{{ counts.archived }}</span>
+                <span class="post-stat-label">Archived</span>
+            </article>
+        </section>
+
+        <section class="author-posts-section">
+            <div class="author-section-heading">
+                <div>
+                    <h2>My Posts</h2>
+                    <p>Only you can view and edit your posts.</p>
+                </div>
+            </div>
+
+            {% if posts %}
+            <div class="author-post-grid">
+                {% for post in posts %}
+                <article class="author-post-card">
+                    <div class="author-post-card-top">
+                        <span class="post-status post-status-{{ post.status }}">{{ post.status|title }}</span>
+                    </div>
+                    <h3>{{ post.title }}</h3>
+                    <p class="author-post-dates">
+                        Created {{ post.created_at.strftime("%b %d, %Y") }}
+                        <span aria-hidden="true">·</span>
+                        Updated {{ post.updated_at.strftime("%b %d, %Y") }}
+                    </p>
+                    <p class="author-post-excerpt">{{ post.content|striptags|truncate(180, true) }}</p>
+                    {% set seo_analysis = seo_analyses[post.id] %}
+                    {% include "auth/_seo_score.html" %}
+                    {% if post.categories or post.tags %}
+                    <div class="author-post-terms">
+                        {% for category in post.categories %}
+                        <span class="post-term post-category">{{ category.name }}</span>
+                        {% endfor %}
+                        {% for tag in post.tags %}
+                        <span class="post-term">#{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="author-post-actions">
+                        {% if post.status == "draft" %}
+                        <a href="{{ url_for('auth.edit_post', post_id=post.id) }}" class="btn btn-outline">Edit</a>
+                        <form method="post" action="{{ url_for('auth.publish_post', post_id=post.id) }}">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-primary">Publish</button>
+                        </form>
+                        {% elif post.status == "published" %}
+                        <a href="{{ url_for('auth.edit_post', post_id=post.id) }}" class="btn btn-outline">Edit</a>
+                        <form method="post" action="{{ url_for('auth.archive_post', post_id=post.id) }}">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-outline">Archive</button>
+                        </form>
+                        {% else %}
+                        <a href="{{ url_for('auth.author_post', post_id=post.id) }}" class="btn btn-outline">View</a>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="author-empty-state">
+                <span class="auth-mark" aria-hidden="true">✦</span>
+                <h3>Your first story starts here</h3>
+                <p>Create a draft and organize it with categories and tags.</p>
+                <a href="{{ url_for('auth.create_post') }}" class="btn btn-primary">Create your first post</a>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+</section>
+{% endblock %}
